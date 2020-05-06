@@ -51,13 +51,18 @@ class PerceptronModel(object):
         """
         "*** YOUR CODE HERE ***"
         batch_size = 1
-        check = 1
-        for i in range(30):
+        check = True
+        while check:
+            check = False
+            temp = self.get_weights()
             for x , y_star in dataset.iterate_once(batch_size):
                 y = self.get_prediction(x)
                 if y == nn.as_scalar(y_star):
                     continue
                 nn.Parameter.update(self.get_weights(),x,nn.as_scalar(y_star))
+                check = True
+            if temp != self.get_weights():
+                check = True
 
 
 class RegressionModel(object):
