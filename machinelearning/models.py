@@ -27,7 +27,7 @@ class PerceptronModel(object):
         Returns: a node containing a single number (the score)
         """
         "*** YOUR CODE HERE ***"
-        
+        # using computing the dot product over the default weights with the values from the dataset
         return nn.DotProduct(self.get_weights(),x)
 
     def get_prediction(self, x):
@@ -37,6 +37,7 @@ class PerceptronModel(object):
         Returns: 1 or -1
         """
         "*** YOUR CODE HERE ***"
+        # call the runfunction to get the dot product values and then converting the values to a scalar
         prediction = nn.as_scalar(self.run(x))
         if(prediction >=0):
             return 1
