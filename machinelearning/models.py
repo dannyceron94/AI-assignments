@@ -53,15 +53,20 @@ class PerceptronModel(object):
         "*** YOUR CODE HERE ***"
         batch_size = 1
         check = True
+        # it should loop untill the value converges?
         while check:
             check = False
             temp = self.get_weights()
+            # gergular singal iteration, maybe i can use the other function
             for x , y_star in dataset.iterate_once(batch_size):
                 y = self.get_prediction(x)
+                # if the predicted value is the same at current weight do nothing else update
+                # default weight vector
                 if y == nn.as_scalar(y_star):
                     continue
                 nn.Parameter.update(self.get_weights(),x,nn.as_scalar(y_star))
                 check = True
+            # keep looping until value converges
             if temp != self.get_weights():
                 check = True
 
