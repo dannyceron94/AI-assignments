@@ -80,6 +80,11 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        # We'll use the ReLU operation for our non-linearity
+        self.w_1 = nn.Parameter(1,205)
+        self.b_1 = nn.Parameter(1,205)
+        self.w_2 = nn.Parameter(1,205)
+        self.b_2 = nn.Parameter(205,1)
 
     def run(self, x):
         """
@@ -91,7 +96,15 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-
+        # normal linear gression stuff
+        xw_1 = nn.Linear(x, self.w_1)
+        # rectifying linear unit nonlinearity 
+        lp1 = nn.ReLU(nn.AddBias(xw_1,self.b_1))
+        # 
+        xw_2 = nn.Linear(lp1,self.w_2)
+        # returning predicted y-values
+        predicted_y =  nn.AddBias(xw_2,self.b_2)
+        return predicted_y
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -103,12 +116,23 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        return nn.SquareLoss(self.run(x),y)
+        
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        while (dataset.get_validation_accuracy()<0.98):
+
+            batch_size = 1
+            multiplier = .001
+            for x , y in dataset.iterate_once(batch_size):
+                loss = self.get_loss(x,y)
+                grad  = nn.gradients(loss, [self.w_1, self.w_2,self.b_1,self.b_2])
+                for i in grad:
+                    i.update(i,multiplier)          
 
 class DigitClassificationModel(object):
     """
