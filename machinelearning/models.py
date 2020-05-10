@@ -83,8 +83,8 @@ class RegressionModel(object):
         # We'll use the ReLU operation for our non-linearity
         self.w_1 = nn.Parameter(1,205)
         self.b_1 = nn.Parameter(1,205)
-        self.w_2 = nn.Parameter(1,205)
-        self.b_2 = nn.Parameter(205,1)
+        self.w_2 = nn.Parameter(205,1)
+        self.b_2 = nn.Parameter(1,1)
 
     def run(self, x):
         """
@@ -96,6 +96,7 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        # this is so confusing some parameter combination wont work if it wants for the cath i would not be able to figure it out
         # normal linear gression stuff
         xw_1 = nn.Linear(x, self.w_1)
         # rectifying linear unit nonlinearity 
@@ -124,15 +125,19 @@ class RegressionModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-        while (dataset.get_validation_accuracy()<0.98):
-
-            batch_size = 1
-            multiplier = .001
+        batch_size = 1
+        multiplier = -.001
+        loss = 0
+        while (1):
             for x , y in dataset.iterate_once(batch_size):
                 loss = self.get_loss(x,y)
-                grad  = nn.gradients(loss, [self.w_1, self.w_2,self.b_1,self.b_2])
-                for i in grad:
-                    i.update(i,multiplier)          
+                grad1,grad2,grad3,grad4  = nn.gradients(loss, [self.w_1, self.w_2,self.b_1,self.b_2])
+                self.w_1.update(grad1,multiplier)
+                self.w_2.update(grad2,multiplier)
+                self.b_1.update(grad3,multiplier)
+                self.b_2.update(grad4,multiplier)
+            if nn.as_scalar(loss) < 0.02:
+                break    
 
 class DigitClassificationModel(object):
     """
