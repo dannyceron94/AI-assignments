@@ -106,6 +106,7 @@ class RegressionModel(object):
         # returning predicted y-values
         predicted_y =  nn.AddBias(xw_2,self.b_2)
         return predicted_y
+
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -157,6 +158,17 @@ class DigitClassificationModel(object):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
 
+        # works but takes too long
+        # self.w_1 = nn.Parameter(784,150)
+        # self.b_1 = nn.Parameter(1,150)
+        # self.w_2 = nn.Parameter(150,10)
+        # self.b_2 = nn.Parameter(1,10)
+
+        # 748x100 the bigger the higher the accurarcy
+        self.w_1 = nn.Parameter(784,100)
+        self.b_1 = nn.Parameter(1,  100)
+        self.w_2 = nn.Parameter(100, 10)
+        self.b_2 = nn.Parameter(1,   10)
     def run(self, x):
         """
         Runs the model for a batch of examples.
@@ -172,6 +184,14 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        xw_1 = nn.Linear(x, self.w_1)
+        # rectifying linear unit nonlinearity 
+        lp1 = nn.ReLU(nn.AddBias(xw_1,self.b_1))
+        # 
+        xw_2 = nn.Linear(lp1,self.w_2)
+        # returning predicted y-values
+        predicted_y =  nn.AddBias(xw_2,self.b_2)
+        return predicted_y
 
     def get_loss(self, x, y):
         """
@@ -187,12 +207,32 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        # using SoftmaxLoss instead of square loss
+        return nn.SoftmaxLoss(self.run(x),y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        # epochs round time depends on the batc size
+        batch_size = 40
+        
+        # when we increase the batch size we need also increase the learning rate
+        multiplier = -.1
+        
+        loss = 0
+        while (1):
+            for x , y in dataset.iterate_once(batch_size):
+                loss = self.get_loss(x,y)
+                grad1,grad2,grad3,grad4  = nn.gradients(loss, [self.w_1, self.w_2,self.b_1,self.b_2])
+                self.w_1.update(grad1,multiplier)
+                self.w_2.update(grad2,multiplier)
+                self.b_1.update(grad3,multiplier)
+                self.b_2.update(grad4,multiplier)
+                # quit program when we reach 97% accurarcy or when we get to the 5th epoch
+            if dataset.get_validation_accuracy() >= .97 or dataset.epoch >= 5:
+                break    
 
 class LanguageIDModel(object):
     """
