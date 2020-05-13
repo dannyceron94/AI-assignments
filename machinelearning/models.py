@@ -215,12 +215,13 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-        # epochs round time depends on the batc size
+        # epochs round time depends on the bathc size
+        # this means update weight after seen 40 trained data
         batch_size = 40
         
         # when we increase the batch size we need also increase the learning rate
+        # this means the amount of steps skipped or taken
         multiplier = -.1
-        
         loss = 0
         while (1):
             for x , y in dataset.iterate_once(batch_size):
@@ -230,7 +231,7 @@ class DigitClassificationModel(object):
                 self.w_2.update(grad2,multiplier)
                 self.b_1.update(grad3,multiplier)
                 self.b_2.update(grad4,multiplier)
-                # quit program when we reach 97% accurarcy or when we get to the 5th epoch
+                # quit program when we reach 97% accurarcy or when we get to the 5th
             if dataset.get_validation_accuracy() >= .97 or dataset.epoch >= 5:
                 break    
 
@@ -252,7 +253,14 @@ class LanguageIDModel(object):
 
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.w_1 = nn.Parameter(47,100)
+        self.b_1 = nn.Parameter(1,  100)
+        self.w_2 = nn.Parameter(100, 100)
 
+        # self.w_2 = nn.Parameter(320, 5)
+        # self.b_2 = nn.Parameter(1,   5)
+        self.w_e = nn.Parameter(100,5)        
+        self.b = nn.Parameter(1,   5)
     def run(self, xs):
         """
         Runs the model for a batch of examples.
@@ -283,6 +291,17 @@ class LanguageIDModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        h = nn.Linear(xs[0],self.w_1)
+        # lp1 = nn.ReLU(nn.AddBias(h,self.b_1))
+        for x in xs[1:]:
+            # h = nn.Linear(x,self.w_1)
+            # h = nn.Add(nn.Linear(x,self.w_1),nn.Linear(h,self.w_2))
+            # lp1 = nn.ReLU(nn.AddBias(h,self.b_1))   
+            # same problem 3 but now we are using the Add function
+            h = nn.Add(nn.Linear(x,self.w_1),nn.Linear(nn.ReLU(nn.AddBias(h,self.b_1)),self.w_2))            
+        z = nn.Linear(h,self.w_e)
+        # return z
+        return nn.AddBias(z,self.b)
 
     def get_loss(self, xs, y):
         """
@@ -299,9 +318,36 @@ class LanguageIDModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        return nn.SoftmaxLoss(self.run(xs),y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        batch_size = 40
+        
+        # when we increase the batch size we need also increase the learning rate
+        # this means the amount of steps skipped or taken
+        multiplier = -.1
+        loss = 0
+        temp =[0]
+        for x , y in dataset.iterate_once(batch_size):
+            temp.append(len(x))
+            # print(len(x))
+        
+        s = max(temp)*20
+        # self.w_1 = nn.Parameter(47,s)
+        # self.w_2 = nn.Parameter(s,s)
+        # self.w_e = nn.Parameter(s,5)   
+        while (1):
+            for x , y in dataset.iterate_once(batch_size):
+                loss = self.get_loss(x,y)
+                grad1,grad2,grad3,grad4 = nn.gradients(loss, [self.w_1, self.w_2,self.w_e,self.b])
+                self.w_1.update(grad1,multiplier)
+                self.w_2.update(grad2,multiplier)
+                self.w_e.update(grad3,multiplier)
+                self.b.update(grad4,multiplier)
+                # quit program when we reach 97% accurarcy or when we get to the 20th
+            if dataset.get_validation_accuracy() >= .83 or dataset.epoch > 20:
+                break
