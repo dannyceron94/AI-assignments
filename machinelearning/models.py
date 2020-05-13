@@ -43,8 +43,6 @@ class PerceptronModel(object):
             return 1
         else:
             return -1
-        # else:
-        #     return 0
 
     def train(self, dataset):
         """
@@ -96,7 +94,7 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-        # this is so confusing some parameter combination wont work if it wants for the cath i would not be able to figure it out
+
         # normal linear gression stuff
         xw_1 = nn.Linear(x, self.w_1)
         # rectifying linear unit nonlinearity 
@@ -157,12 +155,6 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-
-        # works but takes too long
-        # self.w_1 = nn.Parameter(784,150)
-        # self.b_1 = nn.Parameter(1,150)
-        # self.w_2 = nn.Parameter(150,10)
-        # self.b_2 = nn.Parameter(1,10)
 
         # 748x100 the bigger the higher the accurarcy
         self.w_1 = nn.Parameter(784,100)
@@ -231,7 +223,6 @@ class DigitClassificationModel(object):
                 self.w_2.update(grad2,multiplier)
                 self.b_1.update(grad3,multiplier)
                 self.b_2.update(grad4,multiplier)
-                # quit program when we reach 97% accurarcy or when we get to the 5th
             if dataset.get_validation_accuracy() >= .97 or dataset.epoch >= 5:
                 break    
 
@@ -257,8 +248,6 @@ class LanguageIDModel(object):
         self.b_1 = nn.Parameter(1,  100)
         self.w_2 = nn.Parameter(100, 100)
 
-        # self.w_2 = nn.Parameter(320, 5)
-        # self.b_2 = nn.Parameter(1,   5)
         self.w_e = nn.Parameter(100,5)        
         self.b = nn.Parameter(1,   5)
     def run(self, xs):
@@ -292,15 +281,12 @@ class LanguageIDModel(object):
         """
         "*** YOUR CODE HERE ***"
         h = nn.Linear(xs[0],self.w_1)
-        # lp1 = nn.ReLU(nn.AddBias(h,self.b_1))
+        
         for x in xs[1:]:
-            # h = nn.Linear(x,self.w_1)
-            # h = nn.Add(nn.Linear(x,self.w_1),nn.Linear(h,self.w_2))
-            # lp1 = nn.ReLU(nn.AddBias(h,self.b_1))   
-            # same problem 3 but now we are using the Add function
+            
             h = nn.Add(nn.Linear(x,self.w_1),nn.Linear(nn.ReLU(nn.AddBias(h,self.b_1)),self.w_2))            
         z = nn.Linear(h,self.w_e)
-        # return z
+        
         return nn.AddBias(z,self.b)
 
     def get_loss(self, xs, y):
@@ -334,12 +320,9 @@ class LanguageIDModel(object):
         temp =[0]
         for x , y in dataset.iterate_once(batch_size):
             temp.append(len(x))
-            # print(len(x))
-        
+
         s = max(temp)*20
-        # self.w_1 = nn.Parameter(47,s)
-        # self.w_2 = nn.Parameter(s,s)
-        # self.w_e = nn.Parameter(s,5)   
+         
         while (1):
             for x , y in dataset.iterate_once(batch_size):
                 loss = self.get_loss(x,y)
@@ -348,6 +331,5 @@ class LanguageIDModel(object):
                 self.w_2.update(grad2,multiplier)
                 self.w_e.update(grad3,multiplier)
                 self.b.update(grad4,multiplier)
-                # quit program when we reach 97% accurarcy or when we get to the 20th
             if dataset.get_validation_accuracy() >= .83 or dataset.epoch > 20:
                 break
