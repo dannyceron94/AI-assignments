@@ -317,11 +317,6 @@ class LanguageIDModel(object):
         # this means the amount of steps skipped or taken
         multiplier = -.1
         loss = 0
-        temp =[0]
-        for x , y in dataset.iterate_once(batch_size):
-            temp.append(len(x))
-
-        s = max(temp)*20
          
         while (1):
             for x , y in dataset.iterate_once(batch_size):
